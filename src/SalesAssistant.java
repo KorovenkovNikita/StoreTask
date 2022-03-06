@@ -14,7 +14,6 @@ public class SalesAssistant extends Employee implements Stimulated {
         } else {
             x = 25;
             this.premium = (int) (getSalary() * 0.01 * x);
-
         }
     }
 

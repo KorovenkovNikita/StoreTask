@@ -50,7 +50,7 @@ public class StoreFactory {
 
     private Employee[] generateEmployees() {
         Random random = new Random();
-        Employee[] employees = new Employee[random.nextInt(20 - 10) + 10];
+        Employee[] employees = new Employee[random.nextInt(20 - 15) + 15];
         for (int i = 0; i < employees.length; i++) {
             int randOm = random.nextInt(3);
             if (randOm == 0) {

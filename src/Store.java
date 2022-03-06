@@ -7,37 +7,25 @@ public class Store {
     private Product[] products;
     private Employee[] employees;
     private boolean openStatus;
+    private int minPriceProducts;
+    private int maxPriceProducts;
+    private int averageCounterProducts;
 
     public Store(String storeName, Product[] products, Employee[] employees, boolean openStatus) {
         this.storeName = storeName;
         this.products = products;
         this.employees = employees;
         this.openStatus = openStatus;
+        calculateMinMaxAveragePriceProducts();
     }
 
-    public String getSalaryDifferenceSalesAssistantAndCashier() {
-        if (getAverageCounterSalaryCashier() != 0 && getAverageCounterSalarySalesAssistant() != 0) {
-            return "The SalesAssistant's salary is more than the Cashier's salary in: " + (int) ((float) getAverageCounterSalaryCashier() / getAverageCounterSalarySalesAssistant() * 100) + " %";
+    public <T, S> String getSalaryDifferenceEmployees(T firstEmployee, S secondEmployee) {
+        int averageCounterSalaryFirstEmployee = getAverageCounterEmployees(firstEmployee);
+        int averageCounterSalarySecondEmployee = getAverageCounterEmployees(secondEmployee);
+        if (averageCounterSalaryFirstEmployee != 0 && averageCounterSalarySecondEmployee != 0) {
+            return "The " + secondEmployee.toString().substring(6) + "'s salary is more than the " + firstEmployee.toString().substring(6) + "'s salary in: " + ((int) ((float) averageCounterSalaryFirstEmployee / averageCounterSalarySecondEmployee * 100)) + " %";
         } else {
-            return "One type of employee is missing...";
-        }
-    }
-
-    public String getSalaryDifferenceSalesAssistantAndCleaner() {
-        if (getAverageCounterSalaryCleaner() != 0 && getAverageCounterSalarySalesAssistant() != 0) {
-            return "The SalesAssistant's salary is more than the Cleaner's salary in: " + (int) ((float) getAverageCounterSalaryCleaner() / getAverageCounterSalarySalesAssistant() * 100) + " %";
-        } else {
-            return "One type of employee is missing...";
-        }
-    }
-
-    public String getSalaryDifferenceCashierAndCleaner() {
-        int averageCounterSalaryCleaner = getAverageCounterSalaryCleaner();
-        int averageCounterSalaryCashier = getAverageCounterSalaryCashier();
-        if (averageCounterSalaryCleaner != 0 && averageCounterSalaryCashier != 0) {
-            return "The Cashier's salary is more than the Cleaner's salary in: " + (int) ((float) averageCounterSalaryCleaner / averageCounterSalaryCashier * 100) + " %";
-        } else {
-            return "One type of employee is missing...";
+            return "One type of employee is not found...";
         }
     }
 
@@ -45,125 +33,49 @@ public class Store {
         List<String> theFullSalaryOfTheEmployee = new ArrayList<>();
         for (Employee employee : employees) {
             if (employee instanceof Stimulated) {
-                ((Stimulated) employee).calculatePremium(getMaxPriceProducts(), getCounterProducts());
-                int fullSalary = (employee.getSalary()+((Stimulated) employee).getPremium());
-                theFullSalaryOfTheEmployee.add(employee.getName()+": "+"\n\tSalary: "+employee.getSalary()+" RUB"+"\n\tBonus: "+((Stimulated) employee).getPremium()+" RUB"+"\n\tSalary with bonus: "+fullSalary+" RUB"+"\n");
+                ((Stimulated) employee).calculatePremium(maxPriceProducts, products.length);
+                int fullSalary = (employee.getSalary() + ((Stimulated) employee).getPremium());
+                theFullSalaryOfTheEmployee.add(employee.getName() + ": " + "\n\tSalary: " + employee.getSalary() + " RUB" + "\n\tBonus: " + ((Stimulated) employee).getPremium() + " RUB" + "\n\tSalary with bonus: " + fullSalary + " RUB" + "\n");
             }
         }
         return theFullSalaryOfTheEmployee;
     }
 
-    public int getMinPriceProducts() {
-        int min = 300;
-        for (Product product : products) {
-            min = Math.min(min, product.getPrice());
-        }
-        return min;
-    }
-
-    public int getMaxPriceProducts() {
-        int max = 0;
-        for (Product product : products) {
-            max = Math.max(max, product.getPrice());
-        }
-        return max;
-    }
-
-    public int getCounterProducts() {
-        int counterProducts = 0;
-        for (Product product : products) {
-            counterProducts++;
-        }
-        return counterProducts;
-    }
-
-    public int getAverageCounterProducts() {
-        int counterProducts = 0;
+    private void calculateMinMaxAveragePriceProducts() {
+        int min = products[0].getPrice();
+        int max = products[0].getPrice();
         int counterPriceProducts = 0;
         for (Product product : products) {
-            counterProducts++;
+            min = Math.min(min, product.getPrice());
+            max = Math.max(max, product.getPrice());
             counterPriceProducts += product.getPrice();
         }
-        if (counterProducts != 0) {
-            return counterPriceProducts / counterProducts;
-        } else {
-            return 0;
-        }
+        minPriceProducts = min;
+        maxPriceProducts = max;
+        averageCounterProducts = counterPriceProducts / products.length;
     }
 
-    public int getCounterSalesAssistant() {
-        int counterSalesAssistant = 0;
+    public <T> int getCounterByEmployeeType(T employeeType) {
+        int counterEmployee = 0;
         for (Employee employee : employees) {
-            if (employee instanceof SalesAssistant) {
-                counterSalesAssistant++;
+            if (employee.getClass() == employeeType) {
+                counterEmployee++;
             }
         }
-        return counterSalesAssistant;
+        return counterEmployee;
     }
 
-    public int getAverageCounterSalarySalesAssistant() {
-        int counterSalesAssistant = 0;
-        int counterSalarySalesAssistant = 0;
+    public <T> int getAverageCounterEmployees(T employeeType) {
+        int counterEmployees = 0;
+        int counterSalaryEmployees = 0;
         for (Employee employee : employees) {
-            if (employee instanceof SalesAssistant) {
-                counterSalesAssistant++;
-                counterSalarySalesAssistant += employee.getSalary();
+            if (employee.getClass() == employeeType) {
+                counterEmployees++;
+                counterSalaryEmployees += employee.getSalary();
             }
         }
-        if (counterSalesAssistant != 0) {
-            return counterSalarySalesAssistant / counterSalesAssistant;
-        } else {
-            return 0;
-        }
-    }
-
-    public int getCounterCashier() {
-        int counterCashier = 0;
-        for (Employee employee : employees) {
-            if (employee instanceof Cashier) {
-                counterCashier++;
-            }
-        }
-        return counterCashier;
-    }
-
-    public int getAverageCounterSalaryCashier() {
-        int counterCashier = 0;
-        int counterSalaryCashier = 0;
-        for (Employee employee : employees) {
-            if (employee instanceof Cashier) {
-                counterCashier++;
-                counterSalaryCashier += employee.getSalary();
-            }
-        }
-        if (counterCashier != 0) {
-            return counterSalaryCashier / counterCashier;
-        } else {
-            return 0;
-        }
-    }
-
-    public int getCounterCleaner() {
-        int counterCleaner = 0;
-        for (Employee employee : employees) {
-            if (employee instanceof Cleaner) {
-                counterCleaner++;
-            }
-        }
-        return counterCleaner;
-    }
-
-    public int getAverageCounterSalaryCleaner() {
-        int counterCleaner = 0;
-        int counterSalaryCleaner = 0;
-        for (Employee employee : employees) {
-            if (employee instanceof Cleaner) {
-                counterCleaner++;
-                counterSalaryCleaner += employee.getSalary();
-            }
-        }
-        if (counterCleaner != 0) {
-            return counterSalaryCleaner / counterCleaner;
+        if (counterEmployees != 0) {
+            return counterSalaryEmployees / counterEmployees;
         } else {
             return 0;
         }
@@ -175,6 +87,30 @@ public class Store {
                 "\tProducts: " + Arrays.toString(products) + "\n" +
                 "\tEmployees: " + Arrays.toString(employees) + "\n" +
                 "\tOpenStatus: " + openStatus + "\n";
+    }
+
+    public int getMinPriceProducts() {
+        return minPriceProducts;
+    }
+
+    public void setMinPriceProducts(int minPriceProducts) {
+        this.minPriceProducts = minPriceProducts;
+    }
+
+    public int getMaxPriceProducts() {
+        return maxPriceProducts;
+    }
+
+    public void setMaxPriceProducts(int maxPriceProducts) {
+        this.maxPriceProducts = maxPriceProducts;
+    }
+
+    public int getAverageCounterProducts() {
+        return averageCounterProducts;
+    }
+
+    public void setAverageCounterProducts(int averageCounterProducts) {
+        this.averageCounterProducts = averageCounterProducts;
     }
 
     public String getStoreName() {
